@@ -2,6 +2,15 @@
 
 WSL2/Ubuntu-24.04 icindeki Waydroid uygulamalarini Windows'ta native gibi calistir.
 
+## Indirme (son kullanici)
+
+1. GitHub **Releases** sayfasina git: `https://github.com/aicommands79-debug/anidiwin/releases`
+2. En son surumdeki `AndinWin-Portable-vX.Y.Z.zip` dosyasini indir.
+3. Zip'i bir klasore cikar, `AndinWin.exe`'yi cift-tikla. Kurulum ve .NET gerekmez.
+4. Ilk acilista kurulum sihirbazi Ubuntu + Waydroid'i otomatik kurar (tek seferlik 10-20 dk).
+
+Detayli adimlar: `docs/KULLANIM-TR.txt`.
+
 ## Ozellikler (gerceklenen)
 - **App listesi:** `waydroid app list` -> WPF liste, JSON cache ile hizli acilis
 - **APK kurulum:** pencereye surukle-birak veya Dosya->Sec; `waydroid app install`

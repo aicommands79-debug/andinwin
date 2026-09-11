@@ -1,0 +1,27 @@
+name: release
+on:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: write
+jobs:
+  portable:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - run: dotnet publish src/AndinWin.App/AndinWin.App.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o dist/AndinWin-Portable
+      - run: dotnet publish src/AndinWin.Launcher/AndinWin.Launcher.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o dist/AndinWin-Portable
+      - shell: powershell
+        run: |
+          New-Item -ItemType Directory -Path dist/AndinWin-Portable/wsl -Force
+          Copy-Item wsl/andinwin-bridge.sh dist/AndinWin-Portable/wsl/ -Force
+          Copy-Item tools dist/AndinWin-Portable/tools -Recurse -Force
+          Copy-Item docs/KULLANIM-TR.txt dist/AndinWin-Portable/ -Force
+          Compress-Archive -Path dist/AndinWin-Portable/* -DestinationPath "dist/AndinWin-Portable-${{ github.ref_name }}.zip"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.zip
+          generate_release_notes: true

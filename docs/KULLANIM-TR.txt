@@ -1,0 +1,16 @@
+ANDINWIN PORTABLE - INDIR CALISTIR
+===============================
+1. GitHub Releases sayfasindan en son `AndinWin-Portable-vX.Y.Z.zip` dosyasini indir.
+2. Zip'i istedigin yere cikar (ornek: Belgeler\AndinWin).
+3. AndinWin.exe'yi cift-tikla calistir. Kurulum gerekmez, .NET yuklu olmasa da calisir.
+4. Ilk acilista "Ubuntu-24.04 bulunamadi, kurulsun mu?" diye sorar -> Evet de.
+   - Sihirbaz otomatik yapar: Ubuntu kurar, Waydroid'i kurar, multi-window acar.
+   - Tek seferlik 10-20 dk + ~2 GB indirme (Ubuntu + Android imaji). Internet gerekli.
+   - Bazi adimlarda Windows ozellik onayi / yeniden baslatma isteyebilir.
+5. Sonra: APK dosyasini pencereye surukle-birak -> listede gor -> cift-tikla baslat.
+   APK'ye cift tiklayinca da kurulur (dosya iliskisi installer ile gelir, portable'da uygulamayi bir kez calistirman yeterli degilse "APK Yukle" dugmesini kullan).
+6. Kisayol: uygulamayi sec -> "Kisayol Olustur" -> Baslat Menusu/AndinWin Apps.
+7. Kapatinca tepside calismaya devam eder (sag tik -> Cikis ile tamamen kapat).
+
+Sorun olursa: tools/poc-check.ps1 ciktisini paylas.
+Not: Banka/odeme uygulamalari Waydroid'de acilmayabilir (Play Integrity). F-Droid uygulamalariyla dene.
