@@ -1,7 +1,9 @@
 ; AndinWin Inno Setup (Faz-5 MVP) - MSIX'e gecmeden once pratik installer
 ; Kullanim: iscc setup/AndinWin.Setup.iss
 #define MyAppName "AndinWin"
+#ifndef MyAppVersion
 #define MyAppVersion "0.1.0"
+#endif
 #define MyAppExe "AndinWin.exe"
 
 [Setup]
