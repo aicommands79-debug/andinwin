@@ -1,0 +1,18 @@
+PackageIdentifier: AndinWin.AndinWin
+PackageVersion: 0.1.0
+PackageLocale: tr-TR
+Publisher: AndinWin
+PackageName: AndinWin - Windows Android Koprusu
+License: MIT
+ShortDescription: WSL2 + Waydroid ile APK'lari Windows'ta native gibi calistir.
+Description: |-
+  Ubuntu-24.04 + Waydroid koprusu: APK surukle-birak kurulum, Baslat Menusu kisayollari (.lnk + .ico),
+  konsolsuz Launcher, sistem tepsisi kaynak gostergesi ve tek tikla WSL kontrolu.
+Moniker: andinwin
+Tags:
+- wsl
+- waydroid
+- android
+- apk
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0

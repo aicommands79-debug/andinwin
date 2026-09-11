@@ -1,0 +1,25 @@
+<Window x:Class="AndinWin.App.SetupWizardWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AndinWin Kurulum Sihirbazi" Height="480" Width="640" WindowStartupLocation="CenterOwner">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel>
+            <TextBlock Text="Ubuntu-24.04 + Waydroid otomatik kurulum" FontSize="16" FontWeight="Bold"/>
+            <TextBlock Text="Adimlar: WSL kontrol -&gt; Ubuntu kur -&gt; systemd -&gt; Waydroid apt -&gt; init GAPPS -&gt; multi-window. 10-20 dk surebilir, log asagida akar."
+                       TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.8"/>
+            <TextBlock Text="Not: GAPPS sonrasi Google sertifikasiz cihaz uyarisi cikabilir (https://www.google.com/android/uncertified). Banka uygulamalari Play Integrity yuzunden acilmayabilir."
+                       TextWrapping="Wrap" Margin="0,6,0,0" Opacity="0.7" FontSize="12"/>
+        </StackPanel>
+        <TextBox x:Name="LogBox" Grid.Row="1" Margin="0,12,0,12" IsReadOnly="True" VerticalScrollBarVisibility="Auto"
+                 FontFamily="Consolas" FontSize="12" TextWrapping="Wrap"/>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button x:Name="StartBtn" Content="Kurulumu Baslat" Width="150" Margin="0,0,8,0" Click="Start_Click"/>
+            <Button Content="Kapat" Width="100" Click="Close_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

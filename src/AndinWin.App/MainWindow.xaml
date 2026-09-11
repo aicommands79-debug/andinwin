@@ -1,0 +1,53 @@
+﻿<Window x:Class="AndinWin.App.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AndinWin - Windows Android Koprusu" Height="560" Width="760"
+        AllowDrop="True" Drop="Window_Drop" DragOver="Window_DragOver" Closing="Window_Closing">
+    <DockPanel>
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_Dosya">
+                <MenuItem Header="APK Sec ve Yukle..." Click="InstallApk_Click"/>
+                <Separator/>
+                <MenuItem Header="Tepsiye Kucult" Click="MinimizeToTray_Click"/>
+                <MenuItem Header="Cikis" Click="Exit_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Waydroid">
+                <MenuItem Header="Yenile" Click="Refresh_Click"/>
+                <MenuItem Header="Session Baslat" Click="SessionStart_Click"/>
+                <MenuItem Header="Session Durdur" Click="SessionStop_Click"/>
+                <Separator/>
+                <MenuItem Header="WSL'i Kapat (wsl --shutdown)" Click="WslShutdown_Click"/>
+            </MenuItem>
+            <MenuItem Header="_Kurulum">
+                <MenuItem Header="Kurulum Sihirbazi (Ubuntu + Waydroid)..." Click="SetupWizard_Click"/>
+            </MenuItem>
+        </Menu>
+        <StatusBar DockPanel.Dock="Bottom">
+            <StatusBarItem><TextBlock x:Name="StatusText" Text="Hazir. APK'yi pencereye surukle-birak."/></StatusBarItem>
+            <Separator/>
+            <StatusBarItem><TextBlock x:Name="ResourceText" Text="WSL: -"/></StatusBarItem>
+        </StatusBar>
+        <Grid Margin="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Text="Yuklu Android Uygulamalari (Waydroid / Ubuntu-24.04)" FontSize="15" FontWeight="Bold" Margin="0,0,0,8"/>
+            <ListView x:Name="AppList" Grid.Row="1" MouseDoubleClick="AppList_DoubleClick">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn Header="Etiket" Width="240" DisplayMemberBinding="{Binding Label}"/>
+                        <GridViewColumn Header="Paket" Width="320" DisplayMemberBinding="{Binding PackageName}"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,10,0,0">
+                <Button Content="Yenile" Width="110" Margin="0,0,8,0" Click="Refresh_Click"/>
+                <Button Content="Baslat" Width="110" Margin="0,0,8,0" Click="Launch_Click"/>
+                <Button Content="Kisayol Olustur" Width="130" Margin="0,0,8,0" Click="Shortcut_Click"/>
+                <Button Content="APK Yukle..." Width="110" Click="InstallApk_Click"/>
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</Window>

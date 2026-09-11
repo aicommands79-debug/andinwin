@@ -1,0 +1,14 @@
+## .NET
+bin/
+obj/
+TestResults/
+*.user
+*.suo
+.vs/
+## Win
+Thumbs.db
+Desktop.ini
+## AndinWin runtime
+*.log
+## Yayin cikti (buyuk binary/zip, GitHub'a gonderilmez)
+publish/

@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AndinWin.App/AndinWin.App.csproj" />
+    <Project Path="src/AndinWin.Core/AndinWin.Core.csproj" />
+    <Project Path="src/AndinWin.Launcher/AndinWin.Launcher.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AndinWin.Core.Tests/AndinWin.Core.Tests.csproj" />
+  </Folder>
+</Solution>
