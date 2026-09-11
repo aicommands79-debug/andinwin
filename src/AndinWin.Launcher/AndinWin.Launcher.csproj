@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>AndinWin.Launcher</AssemblyName>
+    <ApplicationIcon>..\..\assets\icons\andinwin.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

@@ -20,6 +20,7 @@ jobs:
           Copy-Item wsl/andinwin-bridge.sh dist/AndinWin-Portable/wsl/ -Force
           Copy-Item tools dist/AndinWin-Portable/tools -Recurse -Force
           Copy-Item docs/KULLANIM-TR.txt dist/AndinWin-Portable/ -Force
+          Copy-Item assets dist/AndinWin-Portable/assets -Recurse -Force
           Compress-Archive -Path dist/AndinWin-Portable/* -DestinationPath "dist/AndinWin-Portable-${{ github.ref_name }}.zip"
       - name: Build installer (Inno Setup)
         shell: powershell

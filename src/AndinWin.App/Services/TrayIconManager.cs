@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.IO;
 using WinForms = System.Windows.Forms;
 using AndinWin.Core;
 using AndinWin.Core.Config;
@@ -37,7 +38,7 @@ public sealed class TrayIconManager : IDisposable
 
         _icon = new WinForms.NotifyIcon
         {
-            Icon = SystemIcons.Application,
+            Icon = LoadAppIcon(),
             Text = "AndinWin - baslatiliyor...",
             Visible = true,
         };
@@ -109,6 +110,21 @@ public sealed class TrayIconManager : IDisposable
 
     public void ShowBalloon(string title, string text) =>
         _icon.ShowBalloonTip(2000, title, text, WinForms.ToolTipIcon.Info);
+
+    private static Icon LoadAppIcon()
+    {
+        try
+        {
+            var exeDir = AppContext.BaseDirectory;
+            var iconPath = Path.Combine(exeDir, "assets", "icons", "andinwin.ico");
+            if (File.Exists(iconPath)) return new Icon(iconPath);
+
+            var fallbackPath = Path.Combine(exeDir, "assets", "andinwin.ico");
+            if (File.Exists(fallbackPath)) return new Icon(fallbackPath);
+        }
+        catch { }
+        return SystemIcons.Application;
+    }
 
     public void Dispose()
     {

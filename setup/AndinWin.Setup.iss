@@ -13,6 +13,8 @@ AppVersion={#MyAppVersion}
 DefaultDirName={autopf}\AndinWin
 DefaultGroupName=AndinWin
 OutputBaseFilename=AndinWin-Setup-{#MyAppVersion}
+SetupIconFile=..\assets\icons\andinwin.ico
+UninstallDisplayIcon={app}\{#MyAppExe}
 Compression=lzma
 SolidCompression=yes
 PrivilegesRequired=lowest
@@ -27,10 +29,11 @@ Source: "..\src\AndinWin.Launcher\bin\Release\net8.0\AndinWin.Launcher.exe"; Des
 Source: "..\src\AndinWin.Launcher\bin\Release\net8.0\*.json"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\wsl\andinwin-bridge.sh"; DestDir: "{app}\wsl"; Flags: ignoreversion
 Source: "..\docs\KULLANIM-TR.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\assets\*"; DestDir: "{app}\assets"; Flags: ignoreversion recursesubdirs
 
 [Icons]
-Name: "{group}\AndinWin"; Filename: "{app}\{#MyAppExe}"
-Name: "{autodesktop}\AndinWin"; Filename: "{app}\{#MyAppExe}"; Tasks: desktopicon
+Name: "{group}\AndinWin"; Filename: "{app}\{#MyAppExe}"; IconFilename: "{app}\assets\icons\andinwin.ico"
+Name: "{autodesktop}\AndinWin"; Filename: "{app}\{#MyAppExe}"; IconFilename: "{app}\assets\icons\andinwin.ico"; Tasks: desktopicon
 
 [Registry]
 ; .apk cift-tik iliskisi
