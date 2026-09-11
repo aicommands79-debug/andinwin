@@ -9,6 +9,14 @@ WSL2/Ubuntu-24.04 icindeki Waydroid uygulamalarini Windows'ta native gibi calist
 3. Zip'i bir klasore cikar, `AndinWin.exe`'yi cift-tikla. Kurulum ve .NET gerekmez.
 4. Ilk acilista kurulum sihirbazi Ubuntu + Waydroid'i otomatik kurar (tek seferlik 10-20 dk).
 
+### WinGet (onay surecinde)
+
+Onaydan sonra tek komutla kurulum:
+
+```
+winget install AndinWin.AndinWin
+```
+
 Detayli adimlar: `docs/KULLANIM-TR.txt`.
 
 ## Ozellikler (gerceklenen)
