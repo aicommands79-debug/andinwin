@@ -21,7 +21,16 @@ jobs:
           Copy-Item tools dist/AndinWin-Portable/tools -Recurse -Force
           Copy-Item docs/KULLANIM-TR.txt dist/AndinWin-Portable/ -Force
           Compress-Archive -Path dist/AndinWin-Portable/* -DestinationPath "dist/AndinWin-Portable-${{ github.ref_name }}.zip"
+      - name: Build installer (Inno Setup)
+        shell: powershell
+        run: |
+          $ver = "${{ github.ref_name }}".TrimStart("v")
+          dotnet build AndinWin.slnx -c Release
+          choco install innosetup -y --no-progress
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion=$ver /Odist setup\AndinWin.Setup.iss
       - uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.zip
+          files: |
+            dist/*.zip
+            dist/*.exe
           generate_release_notes: true

@@ -1,0 +1,22 @@
+PackageIdentifier: AndinWin.AndinWin
+PackageVersion: 0.1.1
+Platform:
+- Windows.Desktop
+MinimumOSVersion: 10.0.22000.0
+Architecture: x64
+InstallerType: inno
+Scope: user
+UpgradeBehavior: install
+FileExtensions:
+- apk
+AppsAndFeaturesEntries:
+- DisplayName: AndinWin
+Installers:
+- Architecture: x64
+  InstallerUrl: https://github.com/aicommands79-debug/andinwin/releases/download/v0.1.1/AndinWin-Setup-0.1.1.exe
+  InstallerSha256: HASH_YERINE_GELECEK
+  InstallerSwitches:
+    Silent: /SILENT
+    SilentWithProgress: /SILENT
+ManifestType: installer
+ManifestVersion: 1.6.0

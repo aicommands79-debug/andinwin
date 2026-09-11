@@ -1,0 +1,18 @@
+PackageIdentifier: AndinWin.AndinWin
+PackageVersion: 0.1.1
+PackageLocale: en-US
+Publisher: AndinWin
+PackageName: AndinWin - Windows Android Bridge
+License: MIT
+ShortDescription: Run APKs on Windows like native apps via WSL2 + Waydroid.
+Description: |-
+  Ubuntu-24.04 + Waydroid bridge: drag-and-drop APK install, Start Menu shortcuts (.lnk + .ico),
+  console-free launcher, system tray resource monitor and one-click WSL control.
+Moniker: andinwin
+Tags:
+- wsl
+- waydroid
+- android
+- apk
+ManifestType: locale
+ManifestVersion: 1.6.0

@@ -18,10 +18,13 @@ ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 
 [Files]
-Source: "src\AndinWin.App\bin\Release\net8.0-windows\AndinWin.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "src\AndinWin.App\bin\Release\net8.0-windows\*.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "src\AndinWin.Launcher\bin\Release\net8.0\AndinWin.Launcher.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "wsl\andinwin-bridge.sh"; DestDir: "{app}\wsl"; Flags: ignoreversion
+Source: "..\src\AndinWin.App\bin\Release\net8.0-windows\AndinWin.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\AndinWin.App\bin\Release\net8.0-windows\*.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\AndinWin.App\bin\Release\net8.0-windows\*.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\AndinWin.Launcher\bin\Release\net8.0\AndinWin.Launcher.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\AndinWin.Launcher\bin\Release\net8.0\*.json"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\wsl\andinwin-bridge.sh"; DestDir: "{app}\wsl"; Flags: ignoreversion
+Source: "..\docs\KULLANIM-TR.txt"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 Name: "{group}\AndinWin"; Filename: "{app}\{#MyAppExe}"
@@ -30,7 +33,8 @@ Name: "{autodesktop}\AndinWin"; Filename: "{app}\{#MyAppExe}"; Tasks: desktopico
 [Registry]
 ; .apk cift-tik iliskisi
 Root: HKCU; Subkey: "Software\Classes\.apk"; ValueType: string; ValueName: ""; ValueData: "AndinWin.apk"; Flags: uninsdeletevalue
-Root: HKCU; Subkey: "Software\Classes\AndinWin.apk\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\AndinWin.Launcher.exe"" install ""%1"""
+Root: HKCU; Subkey: "Software\Classes\AndinWin.apk\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\AndinWin.Launcher.exe"" install ""%1"""; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Classes\AndinWin.apk"; Flags: uninsdeletekeyifempty
 
 [Tasks]
 Name: desktopicon; Description: "Masaustu kisayolu olustur"
