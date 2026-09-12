@@ -47,4 +47,19 @@ public static class WaydroidParsers
         if (last.Length == 0) return packageName;
         return char.ToUpperInvariant(last[0]) + last[1..];
     }
+
+    /// <summary>
+    /// Cikti "uygulama yok" degil "waydroid calismiyor" mu diyor? Bos liste + bu isaretler = sessiz hata.
+    /// </summary>
+    public static bool LooksLikeNotRunning(string output)
+    {
+        var lower = output.ToLowerInvariant();
+        string[] markers =
+        [
+            "stopped", "not running", "no session", "session is stopped",
+            "failed", "error", "command not found", "no such file",
+            "connection refused", "traceback", "exception"
+        ];
+        return markers.Any(lower.Contains);
+    }
 }

@@ -57,4 +57,13 @@ public class WaydroidParserTests
         Assert.Equal(2100, parsed!.Value.usedMb);
         Assert.Equal(7835, parsed!.Value.totalMb);
     }
+
+    [Fact]
+    public void LooksLikeNotRunning_DurmusSessioniYakalar()
+    {
+        Assert.True(WaydroidParsers.LooksLikeNotRunning("WayDroid session is stopped\n"));
+        Assert.True(WaydroidParsers.LooksLikeNotRunning("ERROR: container failed to start"));
+        Assert.False(WaydroidParsers.LooksLikeNotRunning("com.spotify.music\ncom.whatsapp\n"));
+        Assert.False(WaydroidParsers.LooksLikeNotRunning(""));
+    }
 }

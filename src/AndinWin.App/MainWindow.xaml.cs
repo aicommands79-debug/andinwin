@@ -120,9 +120,14 @@ public partial class MainWindow : Wpf.Window
 
     private async void SessionStart_Click(object sender, Wpf.RoutedEventArgs e)
     {
-        StatusText.Text = "Session baslatiliyor...";
-        await _client.EnsureSessionAsync();
-        StatusText.Text = "Session hazir.";
+        try
+        {
+            StatusText.Text = "Session baslatiliyor...";
+            await _client.EnsureSessionAsync();
+            StatusText.Text = "Session hazir, liste yenileniyor...";
+            await RefreshAsync();
+        }
+        catch (Exception ex) { StatusText.Text = "Session baslatilamadi: " + ex.Message; }
     }
 
     private async void SessionStop_Click(object sender, Wpf.RoutedEventArgs e)
@@ -168,5 +173,29 @@ public partial class MainWindow : Wpf.Window
         var w = new SetupWizardWindow();
         w.Owner = this;
         w.ShowDialog();
+    }
+
+    private async void Diagnose_Click(object sender, Wpf.RoutedEventArgs e)
+    {
+        try
+        {
+            StatusText.Text = "Tani toplaniyor...";
+            var st = await _client.GetStatusAsync();
+            Wpf.MessageBox.Show(st.RawOutput.Length > 2000 ? st.RawOutput[..2000] : st.RawOutput,
+                "AndinWin Tani (waydroid status)", Wpf.MessageBoxButton.OK, Wpf.MessageBoxImage.Information);
+            StatusText.Text = "Tani gosterildi.";
+        }
+        catch (Exception ex) { StatusText.Text = "Tani alinamadi: " + ex.Message; }
+    }
+
+    private void AssociateApk_Click(object sender, Wpf.RoutedEventArgs e)
+    {
+        try
+        {
+            if (ApkAssociation.IsRegistered()) { StatusText.Text = ".apk iliskisi zaten kurulu."; return; }
+            ApkAssociation.Register();
+            StatusText.Text = ".apk iliskisi kuruldu: cift tikla kurulum calisir.";
+        }
+        catch (Exception ex) { StatusText.Text = "Iliski kurulamadi: " + ex.Message; }
     }
 }

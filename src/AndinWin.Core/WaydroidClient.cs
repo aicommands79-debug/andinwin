@@ -24,7 +24,20 @@ public sealed class WaydroidClient
     public async Task<IReadOnlyList<AndroidApp>> ListAppsAsync(CancellationToken ct = default)
     {
         var r = await _wsl.RunAsync("waydroid app list 2>&1", 30_000, ct);
-        var pkgs = WaydroidParsers.ParseAppList(r.StdOut + "\n" + r.StdErr);
+        var raw = r.StdOut + "\n" + r.StdErr;
+        var pkgs = WaydroidParsers.ParseAppList(raw);
+        if (pkgs.Count == 0)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                throw new InvalidOperationException("Waydroid hic yanit vermedi (bos cikti). Ubuntu dagitimi veya waydroid kurulu olmayabilir. Cozum: Kurulum > Kurulum Sihirbazi.");
+            if (WaydroidParsers.LooksLikeNotRunning(raw))
+            {
+                var snippet = raw.Trim();
+                if (snippet.Length > 400) snippet = snippet[..400] + "...";
+                throw new InvalidOperationException(
+                    $"Waydroid session calismiyor gibi (liste bos). Ham cikti: {snippet} Cozum: Waydroid > Session Baslat'a basin, duzelmezse Tanı'ya bakin.");
+            }
+        }
         return pkgs.Select(p => new AndroidApp(p, WaydroidParsers.LabelFromPackage(p))).ToList();
     }
 
@@ -47,6 +60,8 @@ public sealed class WaydroidClient
     public async Task InstallApkAsync(string windowsApkPath, IProgress<string>? progress = null, CancellationToken ct = default)
     {
         if (!File.Exists(windowsApkPath)) throw new FileNotFoundException("apk bulunamadi", windowsApkPath);
+        progress?.Report("Session kontrol ediliyor...");
+        await EnsureSessionAsync(ct);
         Directory.CreateDirectory(_opt.ApkStagingDir);
         // WSL icine \\wsl$\ yerine /mnt/c uzerinden eris: daha guvenilir
         var fileName = Path.GetFileName(windowsApkPath);

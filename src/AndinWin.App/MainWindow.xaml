@@ -144,12 +144,14 @@
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="_Dosya">
                 <MenuItem Header="APK Seç ve Yükle..." Click="InstallApk_Click"/>
+                <MenuItem Header="APK İlişkisini Kur (.apk çift tık)" Click="AssociateApk_Click"/>
                 <Separator Background="#252F40"/>
                 <MenuItem Header="Tepsiye Küçült" Click="MinimizeToTray_Click"/>
                 <MenuItem Header="Çıkış" Click="Exit_Click"/>
             </MenuItem>
             <MenuItem Header="_Waydroid">
                 <MenuItem Header="Yenile" Click="Refresh_Click"/>
+                <MenuItem Header="Tanı (durumu göster)" Click="Diagnose_Click"/>
                 <MenuItem Header="Session Başlat" Click="SessionStart_Click"/>
                 <MenuItem Header="Session Durdur" Click="SessionStop_Click"/>
                 <Separator Background="#252F40"/>
