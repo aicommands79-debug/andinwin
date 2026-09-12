@@ -73,4 +73,15 @@ public class WaydroidParserTests
         Assert.Equal("https://f-droid.org/repo/com.aurora.store_76.apk",
             AndinWin.Core.Stores.AppStoreService.BuildApkUrl("com.aurora.store", 76));
     }
+
+    [Fact]
+    public void NormalizeDistroList_Utf16KirlenmesiniTemizler()
+    {
+        // wsl.exe UTF-16 basar: "U\0b\0u\0..." ve bosluklu cozumu "U b u n t u"
+        var broken = "U\0b\0u\0n\0t\0u\0-\02\04\0.\00\04\0\r\nk\0a\0l\0i\0-\0l\0i\0n\0u\0x\0\r\n";
+        var names = AndinWin.Core.Setup.SetupService.NormalizeDistroList(broken);
+        Assert.Contains("Ubuntu-24.04", names);
+        var spaced = "U b u n t u - 2 4 . 0 4\n";
+        Assert.Contains("Ubuntu-24.04", AndinWin.Core.Setup.SetupService.NormalizeDistroList(spaced));
+    }
 }

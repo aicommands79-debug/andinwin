@@ -47,8 +47,41 @@ public sealed class SetupService
 
     public async Task<bool> IsDistroInstalledAsync(CancellationToken ct = default)
     {
+        // Yontem 1 (kesin): dagitimin icinde bos komut calistir. Yoksa wsl hata kodu doner.
+        try
+        {
+            var probe = await _proc.RunAsync("wsl.exe", new[] { "-d", _opt.DistroName, "-e", "true" }, 20_000, ct);
+            if (probe.Success) return true;
+            var err = (probe.StdOut + probe.StdErr).ToLowerInvariant();
+            // Dagitim yoksa emin ol: NOT_FOUND / mevcut degil isaretleri
+            if (err.Contains("not_found") || err.Contains("not found") || err.Contains("no distribution")
+                || err.Contains("bulunamadi") || err.Contains("yok"))
+                return false;
+        }
+        catch { }
+        // Yontem 2 (yedek): liste ciktisini temizleyip karsilastir.
+        // wsl.exe listeyi UTF-16 basar, yonlendirmede araya \0 girer ("U\x00b\x00..."), temizlenmeli.
         var r = await _proc.RunAsync("wsl.exe", new[] { "--list", "--quiet" }, 15_000, ct);
-        return (r.StdOut + r.StdErr).Split('\n').Any(l => l.Trim().Equals(_opt.DistroName, StringComparison.OrdinalIgnoreCase));
+        return NormalizeDistroList(r.StdOut + "\n" + r.StdErr)
+            .Any(l => l.Equals(_opt.DistroName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    /// <summary>wsl --list ciktisindaki \0 ve bosluk kirlenmesini temizler (test edilebilir).
+    /// Hedef dagitim adimizda bosluk yok, o yuzden tum bosluklari silmek guvenli.</summary>
+    public static IReadOnlyList<string> NormalizeDistroList(string raw)
+    {
+        var names = new List<string>();
+        foreach (var line in raw.Replace("\0", "").Split('\n'))
+        {
+            var t = line.Trim().TrimEnd('\r');
+            var paren = t.IndexOf('(');
+            if (paren >= 0) t = t[..paren].Trim();
+            t = t.Replace(" ", "");
+            if (t.Length == 0) continue;
+            if (t.StartsWith("windows", StringComparison.OrdinalIgnoreCase)) continue;
+            names.Add(t);
+        }
+        return names;
     }
 
     public async Task<bool> IsWaydroidInitializedAsync(CancellationToken ct = default)
