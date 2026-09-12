@@ -159,6 +159,7 @@
             </MenuItem>
             <MenuItem Header="_Kurulum">
                 <MenuItem Header="Kurulum Sihirbazı (Ubuntu + Waydroid)..." Click="SetupWizard_Click"/>
+                <MenuItem Header="Eksik Kurulumu Tamamla (waydroid init)" Click="InitOnly_Click"/>
             </MenuItem>
             <MenuItem Header="_Mağazalar">
                 <MenuItem Header="Play Store'u Aç" Click="PlayStore_Click"/>

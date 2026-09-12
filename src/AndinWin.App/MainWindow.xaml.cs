@@ -192,6 +192,24 @@ public partial class MainWindow : Wpf.Window
         w.ShowDialog();
     }
 
+    private async void InitOnly_Click(object sender, Wpf.RoutedEventArgs e)
+    {
+        var c = Wpf.MessageBox.Show("Waydroid init calistirilacak (Android imajlari indirilir, ~1 GB, birkac dakika). Devam edilsin mi?",
+            "Eksik Kurulum", Wpf.MessageBoxButton.YesNo, Wpf.MessageBoxImage.Question);
+        if (c != Wpf.MessageBoxResult.Yes) return;
+        try
+        {
+            var setup = new AndinWin.Core.Setup.SetupService();
+            var prog = new Progress<AndinWin.Core.Setup.SetupProgress>(p => StatusText.Text = $"[{p.Step}] {p.Message}");
+            await setup.InitOnlyAsync(prog);
+            StatusText.Text = "Init tamamlandi, liste yenileniyor...";
+            await RefreshAsync();
+            Wpf.MessageBox.Show("Kurulum tamamlandi. APK Yukle ile devam edebilirsiniz.", "AndinWin",
+                Wpf.MessageBoxButton.OK, Wpf.MessageBoxImage.Information);
+        }
+        catch (Exception ex) { StatusText.Text = "Init basarisiz: " + ex.Message; }
+    }
+
     private async void PlayStore_Click(object sender, Wpf.RoutedEventArgs e)
     {
         try

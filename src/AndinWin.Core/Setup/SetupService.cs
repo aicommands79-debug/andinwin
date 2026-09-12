@@ -51,6 +51,24 @@ public sealed class SetupService
         return (r.StdOut + r.StdErr).Split('\n').Any(l => l.Trim().Equals(_opt.DistroName, StringComparison.OrdinalIgnoreCase));
     }
 
+    public async Task<bool> IsWaydroidInitializedAsync(CancellationToken ct = default)
+    {
+        var r = await _wsl.RunAsync("waydroid status 2>&1", 20_000, ct);
+        return !(r.StdOut + r.StdErr).Contains("not initialized", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Waydroid kurulu ama "not initialized" diyen makine icin: sadece init + container + multiwindow.
+    /// Android imajlarini indirir (~1 GB, birkac dakika surer).
+    /// </summary>
+    public async Task InitOnlyAsync(IProgress<SetupProgress>? progress = null, CancellationToken ct = default)
+    {
+        await InitWaydroidAsync(progress, ct);
+        await EnableMultiWindowAsync(progress, ct);
+        progress?.Report(new SetupProgress(SetupStep.Done, "Init tamamlandi. WSL yeniden baslatiliyor..."));
+        await _proc.RunAsync("wsl.exe", new[] { "--terminate", _opt.DistroName }, 30_000, ct);
+    }
+
     private async Task CheckWslAsync(IProgress<SetupProgress>? p, CancellationToken ct)
     {
         p?.Report(new SetupProgress(SetupStep.CheckWsl, "WSL kontrol ediliyor (wsl --status)..."));
