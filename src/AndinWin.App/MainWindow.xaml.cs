@@ -244,11 +244,12 @@ public partial class MainWindow : Wpf.Window
     {
         try
         {
-            StatusText.Text = "Tani toplaniyor...";
-            var st = await _client.GetStatusAsync();
-            Wpf.MessageBox.Show(st.RawOutput.Length > 2000 ? st.RawOutput[..2000] : st.RawOutput,
-                "AndinWin Tani (waydroid status)", Wpf.MessageBoxButton.OK, Wpf.MessageBoxImage.Information);
-            StatusText.Text = "Tani gosterildi.";
+            StatusText.Text = "Tani toplaniyor (6 kontrol)...";
+            var checks = await _client.GetEnvironmentReportAsync();
+            var text = _client.RenderEnvironmentReport(checks);
+            Wpf.MessageBox.Show(text.Length > 2000 ? text[..2000] : text,
+                "AndinWin Tani", Wpf.MessageBoxButton.OK, Wpf.MessageBoxImage.Information);
+            StatusText.Text = checks.All(c => c.Ok) ? "Tani temiz." : "Tani: eksikler var, listeye bakin.";
         }
         catch (Exception ex) { StatusText.Text = "Tani alinamadi: " + ex.Message; }
     }

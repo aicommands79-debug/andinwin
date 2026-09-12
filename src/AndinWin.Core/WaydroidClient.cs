@@ -21,6 +21,15 @@ public sealed class WaydroidClient
         return WaydroidParsers.ParseStatus(r.StdOut + "\n" + r.StdErr);
     }
 
+    public async Task<IReadOnlyList<Diagnostics.EnvCheck>> GetEnvironmentReportAsync(CancellationToken ct = default)
+    {
+        var r = await _wsl.RunAsync(Diagnostics.EnvironmentCheck.ProbeScript, 30_000, ct);
+        return Diagnostics.EnvironmentCheck.ParseProbe(r.StdOut + "\n" + r.StdErr);
+    }
+
+    public string RenderEnvironmentReport(IReadOnlyList<Diagnostics.EnvCheck> checks)
+        => Diagnostics.EnvironmentCheck.RenderText(checks);
+
     public async Task<IReadOnlyList<AndroidApp>> ListAppsAsync(CancellationToken ct = default)
     {
         var r = await _wsl.RunAsync("waydroid app list 2>&1", 30_000, ct);

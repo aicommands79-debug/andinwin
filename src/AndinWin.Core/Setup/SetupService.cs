@@ -97,9 +97,18 @@ public sealed class SetupService
     public async Task InitOnlyAsync(IProgress<SetupProgress>? progress = null, CancellationToken ct = default)
     {
         await InitWaydroidAsync(progress, ct);
+        if (!await IsWaydroidInitializedAsync(ct))
+            throw new InvalidOperationException("Init calisti ama Waydroid hala 'not initialized' diyor. Tani penceresindeki binder/systemd satirlarina bakin (ozel cekirdek gerekebilir).");
         await EnableMultiWindowAsync(progress, ct);
         progress?.Report(new SetupProgress(SetupStep.Done, "Init tamamlandi. WSL yeniden baslatiliyor..."));
         await _proc.RunAsync("wsl.exe", new[] { "--terminate", _opt.DistroName }, 30_000, ct);
+    }
+
+    private static void ThrowIfSudoBlocked(string output)
+    {
+        var lower = output.ToLowerInvariant();
+        if (lower.Contains("a password is required") || lower.Contains("no tty present") || lower.Contains("a terminal is required"))
+            throw new InvalidOperationException("Ubuntu sudo sifresi istendi ve otomatik verilemedi. Cozum: Ubuntu-24.04 terminalini acip bir kez `sudo true` yazarak sifrenizi girin, sonra tekrar deneyin.");
     }
 
     private async Task CheckWslAsync(IProgress<SetupProgress>? p, CancellationToken ct)
@@ -146,13 +155,16 @@ public sealed class SetupService
     private async Task InitWaydroidAsync(IProgress<SetupProgress>? p, CancellationToken ct)
     {
         p?.Report(new SetupProgress(SetupStep.InitWaydroid, "waydroid init -s GAPPS (imaj indiriliyor, tek seferlik)..."));
-        var r = await _wsl.RunAsync("sudo waydroid init -s GAPPS -c https://ota.waydro.id/system -v https://ota.waydro.id/vendor 2>&1 | tail -n 20", 30 * 60_000, ct);
-        p?.Report(new SetupProgress(SetupStep.InitWaydroid, (r.StdOut + r.StdErr).Trim()));
+        var r = await _wsl.RunAsync("sudo -n waydroid init -s GAPPS -c https://ota.waydro.id/system -v https://ota.waydro.id/vendor 2>&1 | tail -n 20", 30 * 60_000, ct);
+        var raw = (r.StdOut + "\n" + r.StdErr).Trim();
+        ThrowIfSudoBlocked(raw);
+        p?.Report(new SetupProgress(SetupStep.InitWaydroid, raw));
     }
 
     private async Task EnableMultiWindowAsync(IProgress<SetupProgress>? p, CancellationToken ct)
     {
         p?.Report(new SetupProgress(SetupStep.EnableMultiWindow, "multi_windows aciliyor + container baslatiliyor..."));
-        await _wsl.RunAsync("sudo systemctl enable --now waydroid-container 2>&1; waydroid prop set persist.waydroid.multi_windows true 2>&1; waydroid session start >/dev/null 2>&1 & sleep 3; waydroid status 2>&1 | head -n 20", 60_000, ct);
+        var r = await _wsl.RunAsync("sudo -n systemctl enable --now waydroid-container 2>&1; waydroid prop set persist.waydroid.multi_windows true 2>&1; waydroid session start >/dev/null 2>&1 & sleep 3; waydroid status 2>&1 | head -n 20", 60_000, ct);
+        ThrowIfSudoBlocked(r.StdOut + "\n" + r.StdErr);
     }
 }

@@ -75,6 +75,29 @@ public class WaydroidParserTests
     }
 
     [Fact]
+    public void ParseProbe_SaglikliMakineyiYesilGosterir()
+    {
+        var fake = "@@WHICH\n/usr/bin/waydroid\n@@STATUS\nSession:\tRUNNING\nContainer:\tRUNNING\n" +
+            "@@BINDER\n/dev/binder\n@@SYSTEMD\nrunning\n@@CONTAINER\nactive\n@@KERNEL\n5.15.133-binder\n@@END\n";
+        var checks = AndinWin.Core.Diagnostics.EnvironmentCheck.ParseProbe(fake);
+        Assert.Equal(7, checks.Count);
+        Assert.All(checks, c => Assert.True(c.Ok));
+    }
+
+    [Fact]
+    public void ParseProbe_EksikBinderVeInitiYakalar()
+    {
+        var fake = "@@WHICH\n/usr/bin/waydroid\n@@STATUS\nWaydroid is not initialized, run \"waydroid init\"\n" +
+            "@@BINDER\nls: cannot access '/dev/binder*': No such file or directory\n@@SYSTEMD\nrunning\n" +
+            "@@CONTAINER\ninactive\n@@KERNEL\n5.15.146.1-microsoft-standard-WSL2\n@@END\n";
+        var byName = AndinWin.Core.Diagnostics.EnvironmentCheck.ParseProbe(fake).ToDictionary(c => c.Name);
+        Assert.False(byName["Init yapilmis"].Ok);
+        Assert.False(byName["Binder surucusu (/dev/binder)"].Ok);
+        Assert.True(byName["Systemd calisiyor"].Ok);
+        Assert.False(byName["Waydroid container servisi"].Ok);
+    }
+
+    [Fact]
     public void NormalizeDistroList_Utf16KirlenmesiniTemizler()
     {
         // wsl.exe UTF-16 basar: "U\0b\0u\0..." ve bosluklu cozumu "U b u n t u"
