@@ -75,6 +75,34 @@ public class WaydroidParserTests
     }
 
     [Fact]
+    public void ParseKernelRelease_AssetleriBulur()
+    {
+        var json = "{\"tag_name\":\"linux-msft-wsl-6.6.1-binder\",\"assets\":[" +
+            "{\"name\":\"bzImage\",\"browser_download_url\":\"https://example.com/bzImage\"}," +
+            "{\"name\":\"modules.tar.gz\",\"browser_download_url\":\"https://example.com/modules.tar.gz\"}]}";
+        var (tag, bz, mod) = AndinWin.Core.Setup.SetupService.ParseKernelRelease(json);
+        Assert.Equal("linux-msft-wsl-6.6.1-binder", tag);
+        Assert.EndsWith("bzImage", bz);
+        Assert.EndsWith("modules.tar.gz", mod);
+    }
+
+    [Fact]
+    public void UpdateWslConfig_MevcutAyarlariKorur()
+    {
+        var before = "[wsl2]\nmemory=8GB\n";
+        var after = AndinWin.Core.Setup.SetupService.UpdateWslConfig(before, "C:\\k\\bzImage");
+        Assert.Contains("memory=8GB", after);
+        Assert.Contains("kernel=C:\\k\\bzImage", after);
+        // ikinci calisma cift satir uretmemeli
+        var twice = AndinWin.Core.Setup.SetupService.UpdateWslConfig(after, "C:\\k2\\bzImage");
+        Assert.DoesNotContain("C:\\k\\bzImage", twice);
+        Assert.Contains("kernel=C:\\k2\\bzImage", twice);
+        // bolum yoksa ekler
+        var fresh = AndinWin.Core.Setup.SetupService.UpdateWslConfig("", "C:\\k\\bzImage");
+        Assert.Contains("[wsl2]", fresh);
+    }
+
+    [Fact]
     public void ParseProbe_SaglikliMakineyiYesilGosterir()
     {
         var fake = "@@WHICH\n/usr/bin/waydroid\n@@STATUS\nSession:\tRUNNING\nContainer:\tRUNNING\n" +

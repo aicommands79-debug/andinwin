@@ -11,6 +11,7 @@ public enum SetupStep
     InstallWaydroid,
     InitWaydroid,
     EnableMultiWindow,
+    BinderKernel,
     Done
 }
 
@@ -110,6 +111,109 @@ public sealed class SetupService
         if (lower.Contains("a password is required") || lower.Contains("no tty present") || lower.Contains("a terminal is required"))
             throw new InvalidOperationException("Ubuntu sudo sifresi istendi ve otomatik verilemedi. Cozum: Ubuntu-24.04 terminalini acip bir kez `sudo true` yazarak sifrenizi girin, sonra tekrar deneyin.");
     }
+
+    /// <summary>
+    /// Stok WSL cekirdeginde binder yoktur. wdpk/wsl2-android-binder-kernel
+    /// (stok Microsoft cekirdegi + binder bayraklari) indirilir, .wslconfig'e islenir,
+    /// WSL yeniden baslatilir ve moduller kurulur. Kaynak acik, surum API'den bulunur.
+    /// </summary>
+    public async Task InstallBinderKernelAsync(IProgress<SetupProgress>? progress = null, CancellationToken ct = default)
+    {
+        void Rep(string m) => progress?.Report(new SetupProgress(SetupStep.BinderKernel, m));
+        Rep("Binder cekirdek surumu sorgulaniyor...");
+        using var http = new HttpClient { Timeout = TimeSpan.FromMinutes(30) };
+        http.DefaultRequestHeaders.UserAgent.ParseAdd("AndinWin");
+        var json = await http.GetStringAsync("https://api.github.com/repos/wdpk/wsl2-android-binder-kernel/releases/latest", ct);
+        var (tag, bzUrl, modUrl) = ParseKernelRelease(json);
+        Rep($"Bulundu: {tag}. bzImage indiriliyor (~15 MB)...");
+        var kdir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".andinwin-kernel");
+        Directory.CreateDirectory(kdir);
+        var bzPath = Path.Combine(kdir, "bzImage");
+        await DownloadFileAsync(http, bzUrl, bzPath, ct);
+        Rep(".wslconfig guncelleniyor (yedek alinir)...");
+        UpdateWslConfigFile(bzPath);
+        Rep("WSL yeniden baslatiliyor (yeni cekirdek icin)...");
+        await _proc.RunAsync("wsl.exe", new[] { "--shutdown" }, 60_000, ct);
+        await _wsl.RunAsync("echo ok", 60_000, ct); // dagitimi tekrar ayaga kaldir
+        Rep("Cekirdek modulleri kuruluyor (~316 MB indirme)...");
+        var mod = await _wsl.RunAsync($"curl -sL -o /tmp/andinwin-modules.tar.gz {Sh(modUrl)} && sudo -n tar -xzf /tmp/andinwin-modules.tar.gz -C /lib/modules/ && sudo -n depmod -a && echo MODULES_DONE 2>&1", 30 * 60_000, ct);
+        var modRaw = mod.StdOut + "\n" + mod.StdErr;
+        ThrowIfSudoBlocked(modRaw);
+        if (!modRaw.Contains("MODULES_DONE"))
+            throw new InvalidOperationException("Modul kurulumu basarisiz: " + modRaw.Trim());
+        var verify = await _wsl.RunAsync("ls /dev/binder* 2>&1", 20_000, ct);
+        var vraw = (verify.StdOut + verify.StdErr).Trim();
+        if (!vraw.Split('\n').Any(l => l.TrimStart().StartsWith("/dev/")))
+            throw new InvalidOperationException("Cekirdek degisti ama /dev/binder hala yok. Cikti: " + vraw);
+        Rep("Binder hazir: " + vraw.Split('\n')[0].Trim());
+    }
+
+    public static (string Tag, string BzImageUrl, string ModulesUrl) ParseKernelRelease(string json)
+    {
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        var root = doc.RootElement;
+        var tag = root.GetProperty("tag_name").GetString() ?? "latest";
+        string? bz = null, mod = null;
+        foreach (var a in root.GetProperty("assets").EnumerateArray())
+        {
+            var name = a.GetProperty("name").GetString() ?? "";
+            var url = a.GetProperty("browser_download_url").GetString() ?? "";
+            if (name.Equals("bzImage", StringComparison.OrdinalIgnoreCase)) bz = url;
+            if (name.Equals("modules.tar.gz", StringComparison.OrdinalIgnoreCase)) mod = url;
+        }
+        if (bz is null || mod is null)
+            throw new InvalidOperationException("Kernel release dosyalari bulunamadi (bzImage/modules.tar.gz).");
+        return (tag, bz, mod);
+    }
+
+    public static string UpdateWslConfig(string existing, string kernelPath)
+    {
+        var lines = existing.Replace("\r\n", "\n").Split('\n').ToList();
+        // [wsl2] bolumunu bul
+        int section = lines.FindIndex(l => l.Trim().Equals("[wsl2]", StringComparison.OrdinalIgnoreCase));
+        if (section < 0)
+        {
+            if (lines.Count > 0 && !string.IsNullOrWhiteSpace(lines[^1])) lines.Add("");
+            lines.Add("[wsl2]");
+            lines.Add($"kernel={kernelPath}");
+            return string.Join("\n", lines).Replace("\n", Environment.NewLine);
+        }
+        // bolum icinde kernel= satiri var mi (sonraki basliga kadar)
+        int end = lines.Count;
+        for (int i = section + 1; i < lines.Count; i++)
+            if (lines[i].Trim().StartsWith("[") && lines[i].Trim().EndsWith("]")) { end = i; break; }
+        for (int i = section + 1; i < end; i++)
+        {
+            if (lines[i].TrimStart().StartsWith("kernel", StringComparison.OrdinalIgnoreCase)
+                && lines[i].Contains('='))
+            {
+                lines[i] = $"kernel={kernelPath}";
+                return string.Join("\n", lines).Replace("\n", Environment.NewLine);
+            }
+        }
+        lines.Insert(end, $"kernel={kernelPath}");
+        return string.Join("\n", lines).Replace("\n", Environment.NewLine);
+    }
+
+    private static void UpdateWslConfigFile(string kernelPath)
+    {
+        var cfg = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".wslconfig");
+        var bak = cfg + ".andinwin.bak";
+        var existing = File.Exists(cfg) ? File.ReadAllText(cfg) : "";
+        if (!File.Exists(bak) && File.Exists(cfg)) File.Copy(cfg, bak);
+        File.WriteAllText(cfg, UpdateWslConfig(existing, kernelPath));
+    }
+
+    private static async Task DownloadFileAsync(HttpClient http, string url, string dest, CancellationToken ct)
+    {
+        using var resp = await http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+        resp.EnsureSuccessStatusCode();
+        await using var src = await resp.Content.ReadAsStreamAsync(ct);
+        await using var dst = File.Create(dest);
+        await src.CopyToAsync(dst, ct);
+    }
+
+    private static string Sh(string s) => "'" + s.Replace("'", "'\\''") + "'";
 
     private async Task CheckWslAsync(IProgress<SetupProgress>? p, CancellationToken ct)
     {

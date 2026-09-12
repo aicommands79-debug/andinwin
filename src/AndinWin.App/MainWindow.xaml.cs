@@ -210,6 +210,23 @@ public partial class MainWindow : Wpf.Window
         catch (Exception ex) { StatusText.Text = "Init basarisiz: " + ex.Message; }
     }
 
+    private async void BinderKernel_Click(object sender, Wpf.RoutedEventArgs e)
+    {
+        var c = Wpf.MessageBox.Show("Binder yamali ozel WSL cekirdegi kurulacak (wdpk/wsl2-android-binder-kernel, stok Microsoft cekirdegi + binder). ~330 MB indirme, WSL bir kez yeniden baslar, mevcut .wslconfig yedeklenir. Devam edilsin mi?",
+            "Binder Cekirdegi", Wpf.MessageBoxButton.YesNo, Wpf.MessageBoxImage.Question);
+        if (c != Wpf.MessageBoxResult.Yes) return;
+        try
+        {
+            var setup = new AndinWin.Core.Setup.SetupService();
+            var prog = new Progress<AndinWin.Core.Setup.SetupProgress>(p => StatusText.Text = $"[{p.Step}] {p.Message}");
+            await setup.InstallBinderKernelAsync(prog);
+            StatusText.Text = "Binder hazir. Simdi Eksik Kurulumu Tamamla adimini calistirin.";
+            Wpf.MessageBox.Show("Binder cekirdegi kuruldu. Siradaki adim: Kurulum > Eksik Kurulumu Tamamla.", "AndinWin",
+                Wpf.MessageBoxButton.OK, Wpf.MessageBoxImage.Information);
+        }
+        catch (Exception ex) { StatusText.Text = "Binder kurulumu basarisiz: " + ex.Message; }
+    }
+
     private async void PlayStore_Click(object sender, Wpf.RoutedEventArgs e)
     {
         try
