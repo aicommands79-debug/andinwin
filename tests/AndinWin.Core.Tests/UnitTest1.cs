@@ -66,4 +66,11 @@ public class WaydroidParserTests
         Assert.False(WaydroidParsers.LooksLikeNotRunning("com.spotify.music\ncom.whatsapp\n"));
         Assert.False(WaydroidParsers.LooksLikeNotRunning(""));
     }
+
+    [Fact]
+    public void BuildApkUrl_FdroidDeseni()
+    {
+        Assert.Equal("https://f-droid.org/repo/com.aurora.store_76.apk",
+            AndinWin.Core.Stores.AppStoreService.BuildApkUrl("com.aurora.store", 76));
+    }
 }

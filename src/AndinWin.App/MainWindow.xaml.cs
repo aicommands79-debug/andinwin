@@ -31,7 +31,7 @@ public partial class MainWindow : Wpf.Window
         Loaded += async (_, _) => await RefreshAsync(useCacheFirst: true);
     }
 
-    private async Task RefreshAsync(bool useCacheFirst = false)
+    private async Task RefreshAsync(bool useCacheFirst = false, bool autoStartRetried = false)
     {
         try
         {
@@ -44,13 +44,30 @@ public partial class MainWindow : Wpf.Window
             var apps = await _client.ListAppsAsync();
             AppList.ItemsSource = apps;
             await _cache.SaveAsync(apps);
-            StatusText.Text = $"{apps.Count} uygulama bulundu.";
+            StatusText.Text = apps.Count == 0
+                ? "Liste bos dondu. APK Yukle ile uygulama ekleyin."
+                : $"{apps.Count} uygulama bulundu.";
+        }
+        catch (Exception ex) when (!autoStartRetried && IsNotRunningError(ex))
+        {
+            // Session durmussa bir kez otomatik baslatip tekrar dene (kullanicinin yasadigi "0 uygulama" durumu)
+            StatusText.Text = "Session durmus gorunuyor, otomatik baslatiliyor...";
+            try
+            {
+                await _client.EnsureSessionAsync();
+                await RefreshAsync(useCacheFirst: false, autoStartRetried: true);
+            }
+            catch (Exception ex2) { StatusText.Text = "Otomatik baslatma basarisiz: " + ex2.Message + " Waydroid > Session Baslat'i deneyin."; }
         }
         catch (Exception ex)
         {
             StatusText.Text = "WSL/Waydroid erisilemedi: " + ex.Message;
         }
     }
+
+    private static bool IsNotRunningError(Exception ex) =>
+        ex.Message.Contains("Session", StringComparison.OrdinalIgnoreCase)
+        || ex.Message.Contains("session", StringComparison.Ordinal);
 
     private AndroidApp? Selected => AppList.SelectedItem as AndroidApp;
 
@@ -173,6 +190,36 @@ public partial class MainWindow : Wpf.Window
         var w = new SetupWizardWindow();
         w.Owner = this;
         w.ShowDialog();
+    }
+
+    private async void PlayStore_Click(object sender, Wpf.RoutedEventArgs e)
+    {
+        try
+        {
+            StatusText.Text = "Play Store aciliyor...";
+            await _client.LaunchAsync(AndinWin.Core.Stores.AppStoreService.PlayStorePackage);
+            StatusText.Text = "Play Store acildi.";
+        }
+        catch (Exception ex) { StatusText.Text = "Play Store acilamadi (GAPPS kurulu olmayabilir): " + ex.Message; }
+    }
+
+    private async void AuroraStore_Click(object sender, Wpf.RoutedEventArgs e)
+    {
+        try
+        {
+            using var store = new AndinWin.Core.Stores.AppStoreService();
+            StatusText.Text = "Aurora Store surumu sorgulaniyor...";
+            var info = await store.GetAuroraStoreInfoAsync();
+            StatusText.Text = $"Aurora Store v{info.VersionName} indiriliyor...";
+            var dest = Path.Combine(_opt.ApkStagingDir, "AuroraStore.apk");
+            var pct = new Progress<double>(p => StatusText.Text = $"Aurora Store indiriliyor %{p:F0}...");
+            await store.DownloadApkAsync(info.ApkUrl, dest, pct);
+            StatusText.Text = "Aurora Store yukleniyor...";
+            await _client.InstallApkAsync(dest, new Progress<string>(m => StatusText.Text = m));
+            StatusText.Text = "Aurora Store kuruldu, liste yenileniyor...";
+            await RefreshAsync();
+        }
+        catch (Exception ex) { StatusText.Text = "Aurora Store kurulamadi: " + ex.Message; }
     }
 
     private async void Diagnose_Click(object sender, Wpf.RoutedEventArgs e)

@@ -160,6 +160,10 @@
             <MenuItem Header="_Kurulum">
                 <MenuItem Header="Kurulum Sihirbazı (Ubuntu + Waydroid)..." Click="SetupWizard_Click"/>
             </MenuItem>
+            <MenuItem Header="_Mağazalar">
+                <MenuItem Header="Play Store'u Aç" Click="PlayStore_Click"/>
+                <MenuItem Header="Aurora Store Kur (Play alternatifi)" Click="AuroraStore_Click"/>
+            </MenuItem>
         </Menu>
 
         <!-- Alt Durum Çubuğu -->

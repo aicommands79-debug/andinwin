@@ -37,5 +37,12 @@ public static class ApkAssociation
             ext?.SetValue("", ProgId);
         using (var cmd = Registry.CurrentUser.CreateSubKey($@"Software\Classes\{ProgId}\shell\open\command"))
             cmd?.SetValue("", $"\"{launcher}\" install \"%1\"");
+        // Sag tik "Birlikte ac" listesinde gorunmesi icin
+        using (var ow = Registry.CurrentUser.CreateSubKey(@"Software\Classes\.apk\OpenWithProgids"))
+            ow?.SetValue(ProgId, new byte[0], RegistryValueKind.Binary);
+        using (var appCmd = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\AndinWin.Launcher.exe\shell\open\command"))
+            appCmd?.SetValue("", $"\"{launcher}\" install \"%1\"");
+        using (var sup = Registry.CurrentUser.CreateSubKey(@"Software\Classes\Applications\AndinWin.Launcher.exe\SupportedTypes"))
+            sup?.SetValue(".apk", "");
     }
 }

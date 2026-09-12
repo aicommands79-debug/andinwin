@@ -40,6 +40,10 @@ Name: "{autodesktop}\AndinWin"; Filename: "{app}\{#MyAppExe}"; IconFilename: "{a
 Root: HKCU; Subkey: "Software\Classes\.apk"; ValueType: string; ValueName: ""; ValueData: "AndinWin.apk"; Flags: uninsdeletevalue
 Root: HKCU; Subkey: "Software\Classes\AndinWin.apk\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\AndinWin.Launcher.exe"" install ""%1"""; Flags: uninsdeletevalue
 Root: HKCU; Subkey: "Software\Classes\AndinWin.apk"; Flags: uninsdeletekeyifempty
+; Sag tik "Birlikte ac" listesi
+Root: HKCU; Subkey: "Software\Classes\.apk\OpenWithProgids"; ValueType: binary; ValueName: "AndinWin.apk"; ValueData: "00"; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Classes\Applications\AndinWin.Launcher.exe\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\AndinWin.Launcher.exe"" install ""%1"""; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Classes\Applications\AndinWin.Launcher.exe\SupportedTypes"; ValueType: string; ValueName: ".apk"; ValueData: ""; Flags: uninsdeletevalue
 
 [Tasks]
 Name: desktopicon; Description: "Masaustu kisayolu olustur"
